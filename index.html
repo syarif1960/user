@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIG Wisata Kabupaten Sukabumi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body {
+      box-sizing: border-box;
+      padding-top: 80px; /* tinggi navbar */
+    }
+    * {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .gradient-hero {
+      background: linear-gradient(135deg, #065f46 0%, #047857 30%, #0d9488 60%, #0891b2 100%);
+    }
+    .map-container {
+      background: linear-gradient(180deg, #ecfdf5 0%, #f0fdfa 50%, #e0f2fe 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .marker-pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    .category-card:hover {
+      transform: scale(1.02);
+    }
+    .destination-card:hover {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    #map { height: 100vh; }
+#peta {
+  scroll-margin-top: 120px; /* sesuaikan tinggi navbar */
+  padding-top: 140px;
+}
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-white">
+  <div id="app" class="w-full h-full overflow-auto">
+    
+    <!-- Navigation -->
+   <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 flex items-center justify-center">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+       </div><span class="font-bold text-emerald-800 text-lg hidden sm:block">SIG Wisata Sukabumi</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8"><a href="#peta" class="text-gray-600 hover:text-emerald-600 transition font-medium">Peta</a> <a href="#kategori" class="text-gray-600 hover:text-emerald-600 transition font-medium">Kategori</a> <a href="#destinasi" class="text-gray-600 hover:text-emerald-600 transition font-medium">Destinasi</a> <a href="#statistik" class="text-gray-600 hover:text-emerald-600 transition font-medium">Statistik</a> <a href="#tentang" class="text-gray-600 hover:text-emerald-600 transition font-medium">Tentang</a> <a href="#kontak" class="px-5 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition font-medium">Kontak</a>
+      <a href="admin.html" 
+   class="px-5 py-2 border border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-600 hover:text-white transition font-medium">
+   Login Admin
+</a>
+        </div><button id="mobileMenuBtn" class="md:hidden p-2 text-gray-600">
+       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+       </svg></button>
+     </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+     <div class="px-4 py-3 space-y-2"><a href="#peta" class="block py-2 text-gray-600 hover:text-emerald-600">Peta</a> <a href="#kategori" class="block py-2 text-gray-600 hover:text-emerald-600">Kategori</a> <a href="#destinasi" class="block py-2 text-gray-600 hover:text-emerald-600">Destinasi</a> <a href="#statistik" class="block py-2 text-gray-600 hover:text-emerald-600">Statistik</a> <a href="#tentang" class="block py-2 text-gray-600 hover:text-emerald-600">Tentang</a> <a href="#kontak" class="block py-2 text-gray-600 hover:text-emerald-600">Kontak</a>
+     <a href="admin.html" 
+   class="block mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg text-center hover:bg-emerald-700 transition">
+   Login Admin
+</a>
+      </div>
+    </div>
+   </nav>
+   
+   <!-- Hero Section -->
+   <section class="gradient-hero pt-24 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+     <svg class="w-full h-full" viewbox="0 0 100 100" preserveaspectratio="none"><pattern id="grid" width="10" height="10" patternunits="userSpaceOnUse">
+       <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5" />
+      </pattern> <rect width="100" height="100" fill="url(#grid)" />
+     </svg>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+     <div class="text-center">
+      <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full mb-6"><span class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span> <span class="text-white/90 text-sm font-medium">Sistem Informasi Geografis</span>
+      </div>
+      <h1 id="heroTitle" class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight">SIG Wisata<br>
+       Kabupaten Sukabumi</h1>
+      <p id="heroSubtitle" class="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8">Pemetaan &amp; Informasi Destinasi Wisata Secara Digital</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center"><a href="#peta" class="px-8 py-4 bg-white text-emerald-700 rounded-full font-semibold hover:bg-emerald-50 transition shadow-lg"> 🗺️ Jelajahi Peta </a> <a href="#destinasi" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold hover:bg-white/10 transition"> 📍 Lihat Destinasi </a>
+      </div>
+     </div>
+     <!-- Floating Elements -->
+     <div class="absolute top-20 left-10 animate-float hidden lg:block">
+      <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+       🏔️
+      </div>
+     </div>
+     <div class="absolute top-40 right-10 animate-float hidden lg:block" style="animation-delay: 1s;">
+      <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+       🏖️
+      </div>
+     </div>
+     <div class="absolute bottom-10 left-20 animate-float hidden lg:block" style="animation-delay: 2s;">
+      <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+       🌊
+      </div>
+     </div>
+    </div>
+   </section>
+   
+    <!-- Interactive Map Section -->
+   <section id="peta" class="py-24 scroll-mt-28 pt-32 pb-24">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Title -->
+    <div class="text-center mb-12">
+      <span class="inline-block px-4 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
+        Peta Interaktif
+      </span>
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+        Peta Wisata Kabupaten Sukabumi
+      </h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Klik pada marker untuk melihat informasi detail setiap destinasi wisata
+      </p>
+    </div>
+
+    <!-- Map Card -->
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden relative">
+
+      <!-- MAP WRAPPER -->
+      <div class="relative w-full">
+        <div id="map" class="w-full h-[420px] md:h-[550px] lg:h-[650px]"></div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+   
+   <!-- Categories Section -->
+   <section id="kategori" class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-12"><span class="inline-block px-4 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium mb-4">Kategori</span>
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Jenis Wisata</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">Temukan berbagai jenis destinasi wisata yang dapat Anda kunjungi di Kabupaten Sukabumi</p>
+     </div>
+     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"><!-- Wisata Alam -->
+      <div class="category-card bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white cursor-pointer transition-all duration-300 hover:shadow-xl" onclick="filterCategory('alam')">
+       <div class="text-4xl mb-4">
+        🏞️
+       </div>
+       <h3 class="font-bold text-lg mb-2">Wisata Alam</h3>
+       <p class="text-white/80 text-sm">Pantai, gunung, air terjun, dan keindahan alam lainnya</p>
+       <div class="mt-4 flex items-center gap-2 text-sm"><span class="bg-white/20 px-3 py-1 rounded-full">25+ Lokasi</span>
+       </div>
+      </div><!-- Wisata Budaya -->
+      <div class="category-card bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white cursor-pointer transition-all duration-300 hover:shadow-xl" onclick="filterCategory('budaya')">
+       <div class="text-4xl mb-4">
+        🏛️
+       </div>
+       <h3 class="font-bold text-lg mb-2">Wisata Budaya</h3>
+       <p class="text-white/80 text-sm">Situs sejarah, tradisi, dan warisan budaya Sunda</p>
+       <div class="mt-4 flex items-center gap-2 text-sm"><span class="bg-white/20 px-3 py-1 rounded-full">12+ Lokasi</span>
+       </div>
+      </div><!-- Wisata Edukasi -->
+      <div class="category-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white cursor-pointer transition-all duration-300 hover:shadow-xl" onclick="filterCategory('edukasi')">
+       <div class="text-4xl mb-4">
+        📚
+       </div>
+       <h3 class="font-bold text-lg mb-2">Wisata Edukasi</h3>
+       <p class="text-white/80 text-sm">Geopark, museum, dan pusat pembelajaran</p>
+       <div class="mt-4 flex items-center gap-2 text-sm"><span class="bg-white/20 px-3 py-1 rounded-full">8+ Lokasi</span>
+       </div>
+      </div><!-- Wisata Kuliner -->
+      <div class="category-card bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-6 text-white cursor-pointer transition-all duration-300 hover:shadow-xl" onclick="filterCategory('kuliner')">
+       <div class="text-4xl mb-4">
+        🍜
+       </div>
+       <h3 class="font-bold text-lg mb-2">Wisata Kuliner</h3>
+       <p class="text-white/80 text-sm">Kuliner khas dan pusat oleh-oleh Sukabumi</p>
+       <div class="mt-4 flex items-center gap-2 text-sm"><span class="bg-white/20 px-3 py-1 rounded-full">15+ Lokasi</span>
+       </div>
+      </div>
+      
+      <!-- Modal Detail Wisata -->
+<div id="kategoriModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div class="bg-white max-w-4xl w-full mx-4 rounded-2xl shadow-xl overflow-y-auto max-h-[90vh]">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center p-6 border-b">
+      <h3 id="modalTitle" class="text-2xl font-bold text-gray-800"></h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+    </div>
+
+    <!-- Content -->
+    <div id="modalContent" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Diisi JS -->
+    </div>
+
+  </div>
+</div>
+
+     </div>
+    </div>
+   </section>
+   
+   <!-- Destinations Section -->
+   <section id="destinasi" class="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white">
+    <div id="destPopup" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div id="destContent" class="p-6"></div>
+  </div>
+</div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-12"><span class="inline-block px-4 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-4">Destinasi Populer</span>
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Tempat Wisata Unggulan</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">Jelajahi destinasi wisata terbaik di Kabupaten Sukabumi</p>
+     </div>
+     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="destinationGrid"><!-- Geopark Ciletuh -->
+      <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group">
+       <div class="aspect-video relative overflow-hidden bg-gray-200"><img src="ciletuh.jpg" alt="Geopark Ciletuh-Palabuhanratu" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #fbbf24, #f59e0b)'; this.alt='Image unavailable';">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-amber-700">
+         UNESCO Global Geopark
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+         <div class="flex items-center justify-between">
+          <div class="bg-amber-500 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-bold">
+           💰 Rp 20.000
+          </div>
+          <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white flex items-center gap-1">
+           <svg class="w-3 h-3" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+           </svg> 📍 Ciletuh
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="p-5">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Geopark Ciletuh-Palabuhanratu</h3>
+        <p class="text-gray-600 text-sm mb-4">Kawasan geopark dengan keindahan bentang alam bersejarah, tebing amphitheater, dan pantai eksotis.</p>
+        <div class="flex flex-wrap gap-2 mb-4"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">🅿️ Parkir</span> <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">🚻 Toilet</span> <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">🍽️ Warung</span> <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">📷 Spot Foto</span>
+        </div><button class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium transition" onclick="showDestination('ciletuh')"> Lihat Detail </button>
+       </div>
+      </div>
+      
+      <!-- Pantai Pelabuhan Ratu -->
+      <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group">
+       <div class="aspect-video relative overflow-hidden bg-gray-200"><img src="pelabuhan ratu.jpg" alt="Pantai Pelabuhan Ratu" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #38bdf8, #0ea5e9)'; this.alt='Image unavailable';">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-sky-700">
+         Pantai Ikonik
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+         <div class="flex items-center justify-between">
+          <div class="bg-sky-500 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-bold">
+           💰 Rp 10.000
+          </div>
+          <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white flex items-center gap-1">
+           <svg class="w-3 h-3" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+           </svg> 📍 Pelabuhan Ratu
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="p-5">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Pantai Pelabuhan Ratu</h3>
+        <p class="text-gray-600 text-sm mb-4">Pantai legendaris dengan ombak besar dan legenda Nyi Roro Kidul. Destinasi favorit wisatawan.</p>
+        <div class="flex flex-wrap gap-2 mb-4"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">🅿️ Parkir</span> <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">🏨 Hotel</span> <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">🍽️ Restoran</span> <span class="px-2 py-1 bg-rose-100 text-rose-700 rounded-full text-xs">🏄 Surfing</span>
+        </div><button class="w-full py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-medium transition" onclick="showDestination('pelabuhan-ratu')"> Lihat Detail </button>
+       </div>
+      </div>
+      
+      <!-- Gunung Gede Pangrango -->
+      <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group">
+       <div class="aspect-video relative overflow-hidden bg-gray-200"><img src="gunung gede.jpg" alt="Taman Nasional Gunung Gede Pangrango" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #34d399, #10b981)'; this.alt='Image unavailable';">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-emerald-700">
+         Taman Nasional
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+         <div class="flex items-center justify-between">
+          <div class="bg-emerald-500 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-bold">
+           💰 Rp 72.000
+          </div>
+          <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white flex items-center gap-1">
+           <svg class="w-3 h-3" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+           </svg> 📍 TNGGP
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="p-5">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Taman Nasional Gede Pangrango</h3>
+        <p class="text-gray-600 text-sm mb-4">Kawasan konservasi dengan jalur pendakian menantang dan keindahan padang edelweiss di puncak.</p>
+        <div class="flex flex-wrap gap-2 mb-4"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">🏕️ Camping</span> <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">🥾 Hiking</span> <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">🦜 Satwa</span> <span class="px-2 py-1 bg-teal-100 text-teal-700 rounded-full text-xs">🌸 Flora</span>
+        </div><button class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition" onclick="showDestination('gede-pangrango')"> Lihat Detail </button>
+       </div>
+      </div>
+      
+      <!-- Situ Gunung -->
+      <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group">
+       <div class="aspect-video relative overflow-hidden bg-gray-200"><img src="suspension.jpg" alt="Situ Gunung Suspension Bridge" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #2dd4bf, #14b8a6)'; this.alt='Image unavailable';">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-teal-700">
+         Suspension Bridge
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+         <div class="flex items-center justify-between">
+          <div class="bg-teal-500 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-bold">
+           💰 Rp 100.000
+          </div>
+          <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white flex items-center gap-1">
+           <svg class="w-3 h-3" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+           </svg> 📍 Situ Gunung
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="p-5">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Situ Gunung Suspension Bridge</h3>
+        <p class="text-gray-600 text-sm mb-4">Jembatan gantung terpanjang di Asia Tenggara dengan pemandangan danau dan hutan pinus yang menakjubkan.</p>
+        <div class="flex flex-wrap gap-2 mb-4"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">🅿️ Parkir</span> <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">🚡 Jembatan</span> <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">☕ Cafe</span> <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">📷 Spot Foto</span>
+        </div><button class="w-full py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-medium transition" onclick="showDestination('situ-gunung')"> Lihat Detail </button>
+       </div>
+      </div>
+      
+      <!-- Curug Sawer -->
+      <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group">
+       <div class="aspect-video relative overflow-hidden bg-gray-200"><img src="curug sawer.webp" alt="Curug Sawer" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #22d3ee, #06b6d4)'; this.alt='Image unavailable';">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-cyan-700">
+         Air Terjun
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+         <div class="flex items-center justify-between">
+          <div class="bg-cyan-500 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-bold">
+           💰 Rp 15.000
+          </div>
+          <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white flex items-center gap-1">
+           <svg class="w-3 h-3" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+           </svg> 📍 Curug Sawer
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="p-5">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Curug Sawer</h3>
+        <p class="text-gray-600 text-sm mb-4">Air terjun megah setinggi 80 meter yang berada di kawasan Taman Nasional Gunung Gede Pangrango.</p>
+        <div class="flex flex-wrap gap-2 mb-4"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">🥾 Trekking</span> <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">🏊 Berenang</span> <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">🌿 Alam</span>
+        </div><button class="w-full py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl font-medium transition" onclick="showDestination('curug-sawer')"> Lihat Detail </button>
+       </div>
+      </div>
+      
+      <!-- Pantai Karang Hawu -->
+      <div class="destination-card bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group">
+       <div class="aspect-video relative overflow-hidden bg-gray-200"><img src="karang-hawu.webp" alt="Pantai Karang Hawu" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="console.error('Image failed to load:', this.src); this.style.background='linear-gradient(135deg, #a78bfa, #8b5cf6)'; this.alt='Image unavailable';">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-violet-700">
+         Formasi Batu Unik
+        </div>
+        <div class="absolute bottom-4 left-4 right-4">
+         <div class="flex items-center justify-between">
+          <div class="bg-violet-500 backdrop-blur px-3 py-1 rounded-full text-xs text-white font-bold">
+           💰 Rp 10.000
+          </div>
+          <div class="bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white flex items-center gap-1">
+           <svg class="w-3 h-3" fill="currentColor" viewbox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+           </svg> 📍 Karang Hawu
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="p-5">
+        <h3 class="font-bold text-lg text-gray-800 mb-2">Pantai Karang Hawu</h3>
+        <p class="text-gray-600 text-sm mb-4">Pantai eksotis dengan formasi batu karang vulkanik berbentuk tungku yang spektakuler.</p>
+        <div class="flex flex-wrap gap-2 mb-4"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">🅿️ Parkir</span> <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">📷 Sunset</span> <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">🍽️ Warung</span>
+        </div><button class="w-full py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-xl font-medium transition" onclick="showDestination('karang-hawu')"> Lihat Detail </button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section>
+   
+   <!-- Statistics Section -->
+   <section id="statistik" class="py-16 md:py-24 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+     <svg class="w-full h-full" viewbox="0 0 100 100" preserveaspectratio="none"><pattern id="dots" width="5" height="5" patternunits="userSpaceOnUse">
+       <circle cx="2.5" cy="2.5" r="1" fill="white" />
+      </pattern> <rect width="100" height="100" fill="url(#dots)" />
+     </svg>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+     <div class="text-center mb-12"><span class="inline-block px-4 py-1 bg-white/20 backdrop-blur text-white rounded-full text-sm font-medium mb-4">Statistik</span>
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Data Pariwisata Kabupaten Sukabumi</h2>
+      <p class="text-white/80 max-w-2xl mx-auto">Perkembangan sektor pariwisata dalam angka</p>
+     </div>
+     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      <div class="stat-card bg-white/10 backdrop-blur rounded-2xl p-6 text-center transition-all duration-300 hover:bg-white/20">
+       <div class="text-4xl mb-3">
+        📍
+       </div>
+       <div class="text-4xl md:text-5xl font-bold text-white mb-2">
+        60+
+       </div>
+       <div class="text-white/80 text-sm">
+        Destinasi Wisata
+       </div>
+      </div>
+      <div class="stat-card bg-white/10 backdrop-blur rounded-2xl p-6 text-center transition-all duration-300 hover:bg-white/20">
+       <div class="text-4xl mb-3">
+        👥
+       </div>
+       <div class="text-4xl md:text-5xl font-bold text-white mb-2">
+        2.5M
+       </div>
+       <div class="text-white/80 text-sm">
+        Wisatawan/Tahun
+       </div>
+      </div>
+      <div class="stat-card bg-white/10 backdrop-blur rounded-2xl p-6 text-center transition-all duration-300 hover:bg-white/20">
+       <div class="text-4xl mb-3">
+        🏨
+       </div>
+       <div class="text-4xl md:text-5xl font-bold text-white mb-2">
+        150+
+       </div>
+       <div class="text-white/80 text-sm">
+        Akomodasi
+       </div>
+      </div>
+      <div class="stat-card bg-white/10 backdrop-blur rounded-2xl p-6 text-center transition-all duration-300 hover:bg-white/20">
+       <div class="text-4xl mb-3">
+        🌏
+       </div>
+       <div class="text-4xl md:text-5xl font-bold text-white mb-2">
+        4.145
+       </div>
+       <div class="text-white/80 text-sm">
+        km² Luas Wilayah
+       </div>
+      </div>
+     </div>
+     
+     <!-- Achievement Badges -->
+     <div class="mt-12 flex flex-wrap justify-center gap-4">
+      <div class="bg-white/20 backdrop-blur px-6 py-3 rounded-full flex items-center gap-3"><span class="text-2xl">🏆</span> <span class="text-white font-medium">UNESCO Global Geopark 2018</span>
+      </div>
+      <div class="bg-white/20 backdrop-blur px-6 py-3 rounded-full flex items-center gap-3"><span class="text-2xl">����</span> <span class="text-white font-medium">Taman Nasional Warisan Dunia</span>
+      </div>
+      <div class="bg-white/20 backdrop-blur px-6 py-3 rounded-full flex items-center gap-3"><span class="text-2xl">⭐</span> <span class="text-white font-medium">Top 10 Destinasi Jawa Barat</span>
+      </div>
+     </div>
+    </div>
+   </section>
+   
+   <!-- About Section -->
+   <section id="tentang" class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div><span class="inline-block px-4 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">Tentang</span>
+       <h2 id="aboutTitle" class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Tentang SIG Wisata Kabupaten Sukabumi</h2>
+       <div class="space-y-4 text-gray-600">
+        <p><strong>Sistem Informasi Geografis (SIG) Wisata Kabupaten Sukabumi</strong> adalah platform digital yang dikembangkan untuk memetakan dan menyajikan informasi destinasi wisata secara komprehensif.</p>
+        <p>Platform ini bertujuan untuk memudahkan wisatawan dalam menemukan, merencanakan, dan mengeksplorasi berbagai destinasi wisata di Kabupaten Sukabumi dengan informasi yang akurat dan terkini.</p>
+        <p>Dengan memanfaatkan teknologi pemetaan digital, SIG Wisata menyediakan data koordinat, fasilitas, aksesibilitas, dan informasi penting lainnya untuk setiap destinasi wisata.</p>
+       </div>
+       <div class="mt-8 grid grid-cols-2 gap-4">
+        <div class="bg-emerald-50 rounded-xl p-4">
+         <div class="text-emerald-600 text-2xl mb-2">
+          🎯
+         </div>
+         <h4 class="font-semibold text-gray-800 mb-1">Akurat</h4>
+         <p class="text-gray-600 text-sm">Data koordinat dan informasi yang terverifikasi</p>
+        </div>
+        <div class="bg-blue-50 rounded-xl p-4">
+         <div class="text-blue-600 text-2xl mb-2">
+          🔄
+         </div>
+         <h4 class="font-semibold text-gray-800 mb-1">Terkini</h4>
+         <p class="text-gray-600 text-sm">Informasi diperbarui secara berkala</p>
+        </div>
+        <div class="bg-teal-50 rounded-xl p-4">
+         <div class="text-teal-600 text-2xl mb-2">
+          ��
+         </div>
+         <h4 class="font-semibold text-gray-800 mb-1">Mudah Diakses</h4>
+         <p class="text-gray-600 text-sm">Dapat diakses dari berbagai perangkat</p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-4">
+         <div class="text-amber-600 text-2xl mb-2">
+          🗺️
+         </div>
+         <h4 class="font-semibold text-gray-800 mb-1">Interaktif</h4>
+         <p class="text-gray-600 text-sm">Peta yang dapat dieksplorasi langsung</p>
+        </div>
+       </div>
+      </div>
+      <div class="relative">
+       <div class="bg-gradient-to-br from-emerald-100 to-teal-100 rounded-3xl p-8 relative">
+        <div class="absolute -top-4 -right-4 w-24 h-24 bg-emerald-500 rounded-full opacity-20"></div>
+        <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-teal-500 rounded-full opacity-20"></div>
+        <div class="relative space-y-4">
+         <div class="bg-white rounded-2xl p-4 shadow-lg flex items-center gap-4">
+          <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-2xl">
+           📊
+          </div>
+          <div>
+           <h4 class="font-semibold text-gray-800">Data Spasial</h4>
+           <p class="text-gray-600 text-sm">Koordinat geografis akurat</p>
+          </div>
+         </div>
+         <div class="bg-white rounded-2xl p-4 shadow-lg flex items-center gap-4">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl">
+           🔍
+          </div>
+          <div>
+           <h4 class="font-semibold text-gray-800">Pencarian Mudah</h4>
+           <p class="text-gray-600 text-sm">Filter berdasarkan kategori</p>
+          </div>
+         </div>
+         <div class="bg-white rounded-2xl p-4 shadow-lg flex items-center gap-4">
+          <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center text-2xl">
+           📝
+          </div>
+          <div>
+           <h4 class="font-semibold text-gray-800">Info Lengkap</h4>
+           <p class="text-gray-600 text-sm">Fasilitas, akses, dan ulasan</p>
+          </div>
+         </div>
+         <div class="bg-white rounded-2xl p-4 shadow-lg flex items-center gap-4">
+          <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-2xl">
+           🧭
+          </div>
+          <div>
+           <h4 class="font-semibold text-gray-800">Navigasi</h4>
+           <p class="text-gray-600 text-sm">Integrasi dengan Google Maps</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section>
+   
+   <!-- Contact Section -->
+   <section id="kontak" class="py-16 md:py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="text-center mb-12"><span class="inline-block px-4 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">Kontak</span>
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Hubungi Kami</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">Untuk informasi lebih lanjut mengenai pariwisata Kabupaten Sukabumi</p>
+     </div>
+     <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+       <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+        📍
+       </div>
+       <h3 class="font-semibold text-gray-800 mb-2">Alamat</h3>
+       <p class="text-gray-600 text-sm">Jl. Siliwangi No. 1<br>
+        Palabuhanratu, Kabupaten Sukabumi<br>
+        Jawa Barat 43364</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+       <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+        📞
+       </div>
+       <h3 class="font-semibold text-gray-800 mb-2">Telepon</h3>
+       <p id="contactPhone" class="text-gray-600 text-sm">(0266) 123456</p>
+       <p class="text-gray-600 text-sm mt-1">Senin - Jumat: 08.00 - 16.00 WIB</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition">
+       <div class="w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+        📧
+       </div>
+       <h3 class="font-semibold text-gray-800 mb-2">Email</h3>
+       <p id="contactEmail" class="text-gray-600 text-sm">pariwisata@sukabumikab.go.id</p>
+       <p class="text-gray-600 text-sm mt-1">Respon dalam 1-2 hari kerja</p>
+      </div>
+     </div>
+     
+     <!-- Social Media -->
+<div class="mt-12 text-center">
+  <p class="text-gray-600 mb-4">Ikuti & hubungi kami</p>
+
+  <div class="flex justify-center gap-4">
+
+    <!-- Instagram -->
+    <a href="https://instagram.com/sigwisatasukabumi"
+       target="_blank"
+       class="w-12 h-12 bg-white rounded-xl shadow flex items-center justify-center text-xl text-pink-600 hover:shadow-lg hover:scale-105 transition">
+      <i class="fab fa-instagram"></i>
+    </a>
+
+    <!-- Website -->
+    <a href="https://wisata.sukabumikab.go.id"
+       target="_blank"
+       class="w-12 h-12 bg-white rounded-xl shadow flex items-center justify-center text-xl text-emerald-600 hover:shadow-lg hover:scale-105 transition">
+      <i class="fas fa-globe"></i>
+    </a>
+
+    <!-- Email -->
+    <a href="mailto:wisata@sukabumikab.go.id"
+       class="w-12 h-12 bg-white rounded-xl shadow flex items-center justify-center text-xl text-blue-600 hover:shadow-lg hover:scale-105 transition">
+      <i class="fas fa-envelope"></i>
+    </a>
+
+    <!-- WhatsApp -->
+    <a href="https://wa.me/6281234567890"
+       target="_blank"
+       class="w-12 h-12 bg-white rounded-xl shadow flex items-center justify-center text-xl text-green-600 hover:shadow-lg hover:scale-105 transition">
+      <i class="fab fa-whatsapp"></i>
+    </a>
+
+  </div>
+</div>
+
+    </div>
+   </section>
+   
+   <!-- Footer -->
+   <footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+     <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div class="md:col-span-2">
+       <div class="flex items-center gap-3 mb-4"><!-- Government Logo -->
+        <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center p-2 shadow">
+  <img 
+    src="logo kabupaten.png" 
+    alt="Logo Kabupaten Sukabumi"
+    class="w-full h-full object-contain"
+  >
+</div>
+
+        <div>
+         <h3 class="font-bold text-lg">Pemerintah Kabupaten Sukabumi</h3>
+         <p class="text-gray-400 text-sm">Dinas Pariwisata dan Kebudayaan</p>
+        </div>
+       </div>
+       <p class="text-gray-400 text-sm max-w-md">SIG Wisata Kabupaten Sukabumi adalah inisiatif Pemerintah Daerah dalam memajukan sektor pariwisata melalui teknologi informasi geografis.</p>
+      </div>
+      <div>
+       <h4 class="font-semibold mb-4">Tautan Cepat</h4>
+       <ul class="space-y-2 text-gray-400 text-sm">
+        <li><a href="#peta" class="hover:text-emerald-400 transition">Peta Wisata</a></li>
+        <li><a href="#kategori" class="hover:text-emerald-400 transition">Kategori</a></li>
+        <li><a href="#destinasi" class="hover:text-emerald-400 transition">Destinasi</a></li>
+        <li><a href="#tentang" class="hover:text-emerald-400 transition">Tentang Kami</a></li>
+       </ul>
+      </div>
+      <div>
+       <h4 class="font-semibold mb-4">Layanan</h4>
+       <ul class="space-y-2 text-gray-400 text-sm">
+        <li><a href="#" class="hover:text-emerald-400 transition">Informasi Wisata</a></li>
+        <li><a href="#" class="hover:text-emerald-400 transition">Peta Digital</a></li>
+        <li><a href="#" class="hover:text-emerald-400 transition">Data Statistik</a></li>
+        <li><a href="#kontak" class="hover:text-emerald-400 transition">Hubungi Kami</a></li>
+       </ul>
+      </div>
+     </div>
+     <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-gray-400 text-sm text-center md:text-left">© 2024 Dinas Pariwisata dan Kebudayaan Kabupaten Sukabumi. Hak Cipta Dilindungi.</p>
+      <div class="flex items-center gap-4 text-gray-400 text-sm"><a href="#" class="hover:text-emerald-400 transition">Kebijakan Privasi</a> <span>|</span> <a href="#" class="hover:text-emerald-400 transition">Syarat &amp; Ketentuan</a>
+      </div>
+     </div>
+    </div>
+   </footer>
+  </div>
+
+  <script>
+    // Default configuration
+    const defaultConfig = {
+      hero_title: 'SIG Wisata\nKabupaten Sukabumi',
+      hero_subtitle: 'Pemetaan & Informasi Destinasi Wisata Secara Digital',
+      about_title: 'Tentang SIG Wisata Kabupaten Sukabumi',
+      contact_phone: '(0266) 123456',
+      contact_email: 'pariwisata@sukabumikab.go.id',
+      background_color: '#065f46',
+      surface_color: '#ffffff',
+      text_color: '#1f2937',
+      primary_action_color: '#059669',
+      secondary_action_color: '#0891b2'
+    };
+
+    // Destination data
+    const destinations = {
+      'ciletuh': {
+        name: 'Geopark Ciletuh-Palabuhanratu',
+        category: 'Geopark UNESCO',
+        description: 'Geopark Ciletuh-Palabuhanratu adalah kawasan geologi yang diakui UNESCO sejak 2018. Kawasan ini memiliki bentang alam spektakuler termasuk tebing amphitheater alami, pantai-pantai eksotis, dan formasi batuan berusia jutaan tahun. Geopark ini menjadi laboratorium alam untuk studi geologi dan keanekaragaman hayati.',
+        coordinates:  {
+  lat: -7.1813951,
+  lng: 106.4633074
+},
+        price: 'Rp 20.000',
+        priceDetail: 'per orang (Paket Wisata: Rp 350.000 - Rp 500.000)',
+        image: 'ciletuh.jpg',
+        facilities: ['Area Parkir Luas', 'Pusat Informasi', 'Toilet Umum', 'Warung Makan', 'Spot Foto', 'Pemandu Wisata'],
+        tips: 'Waktu terbaik berkunjung adalah pagi hari untuk menghindari terik matahari. Gunakan alas kaki yang nyaman untuk trekking.',
+        color: '#f59e0b'
+      },
+      'pelabuhan-ratu': {
+        name: 'Pantai Pelabuhan Ratu',
+        category: 'Pantai',
+        description: 'Pantai Pelabuhan Ratu adalah destinasi pantai paling ikonik di Sukabumi dengan legenda Nyi Roro Kidul yang terkenal. Pantai ini menawarkan ombak besar yang cocok untuk surfing, sunset yang memukau, dan berbagai fasilitas wisata lengkap termasuk hotel, restoran, dan tempat pelelangan ikan.',
+        coordinates: {
+  lat: -6.977538,
+  lng: 106.4917288
+},
+        price: 'Rp 10.000',
+        priceDetail: 'per orang (Parkir: Rp 5.000 - Rp 10.000)',
+        image: 'pelabuhan ratu.jpg',
+        facilities: ['Hotel & Penginapan', 'Restoran Seafood', 'Penyewaan Papan Surfing', 'Area Parkir', 'Toilet Umum', 'Penjaga Pantai'],
+        tips: 'Hati-hati dengan ombak yang besar. Hindari berenang terlalu jauh dari pantai. Waktu terbaik untuk surfing adalah pagi hari.',
+        color: '#0ea5e9'
+      },
+      'gede-pangrango': {
+        name: 'Taman Nasional Gunung Gede Pangrango',
+        category: 'Taman Nasional',
+        description: 'Taman Nasional Gunung Gede Pangrango adalah kawasan konservasi dengan keanekaragaman hayati yang tinggi. Gunung Gede (2.958 mdpl) dan Gunung Pangrango (3.019 mdpl) menawarkan jalur pendakian menantang dengan pemandangan padang edelweiss yang ikonik di puncaknya.',
+        coordinates: {
+  lat: -6.8125756,
+  lng: 106.8987545
+},
+        price: 'Rp 72.000',
+        priceDetail: 'per orang 72.000-92.000 (Wisatawan Domestik), Rp 435.000 (Asing)',
+        image: 'gunung gede.jpg',
+        facilities: ['Pos Pendakian', 'Area Camping', 'Shelter', 'Sumber Air', 'Toilet', 'Pusat Informasi'],
+        tips: 'Pendakian memerlukan izin dari BTNGGP( https://booking.gedepangrango.org ). Bawa perlengkapan gunung lengkap. Pastikan TIDAK melakukan pendakian tanpa persiapan dan ilegal.',
+        color: '#22c55e'
+      },
+      'situ-gunung': {
+        name: 'Situ Gunung Suspension Bridge',
+        category: 'Wisata Alam',
+        description: 'Situ Gunung terkenal dengan jembatan gantung terpanjang di Asia Tenggara sepanjang 243 meter pada ketinggian 161 meter. Kawasan ini juga memiliki danau alami yang indah, hutan pinus yang asri, dan berbagai spot foto instagramable.',
+        coordinates: {
+  lat: -6.8369482,
+  lng: 106.9245204
+},
+        price: 'Rp 100.000',
+        priceDetail: 'per orang/trip , Rp 100.000 - 125.000 per orang/trip (Vip)',
+        image: 'suspension.jpg',
+        facilities: ['Jembatan Gantung', 'Area Parkir', 'Kafe & Resto', 'Toilet', 'Spot Foto', 'Flying Fox'],
+        tips: 'Kunjungi saat weekday untuk menghindari antrean panjang. Jembatan ditutup saat hujan deras atau angin kencang.',
+        color: '#10b981'
+      },
+      'curug-sawer': {
+        name: 'Curug Sawer',
+        category: 'Air Terjun',
+        description: 'Curug Sawer adalah air terjun megah setinggi 80 meter yang tersembunyi di kawasan Taman Nasional Gunung Gede Pangrango. Untuk mencapai lokasi, pengunjung harus melewati jalur trekking sejauh 4 km melalui hutan tropis yang rimbun.',
+        coordinates: {
+  lat: -6.8078157,
+  lng: 106.0801157
+},
+        price: 'Rp 15.000',
+        priceDetail: 'per orang (Sudah termasuk dalam tiket TNGGP)',
+        image: 'curug sawer.webp',
+        facilities: ['Jalur Trekking', 'Area Istirahat', 'Warung Sederhana', 'Toilet Alam'],
+        tips: 'Gunakan sepatu hiking yang kuat. Bawa bekal makanan dan air minum yang cukup. Trekking memakan waktu 2-3 jam.',
+        color: '#06b6d4'
+      },
+      'karang-hawu': {
+        name: 'Pantai Karang Hawu',
+        category: 'Pantai',
+        description: 'Pantai Karang Hawu terkenal dengan formasi batu karang vulkanik berbentuk tungku (hawu dalam bahasa Sunda) yang unik. Pantai ini menawarkan pemandangan sunset yang spektakuler dan suasana yang lebih tenang dibandingkan Pelabuhan Ratu.',
+        coordinates: {
+  lat: -6.9577059,
+  lng: 106.4604067
+},
+        price: 'Rp 10.000',
+        priceDetail: 'per orang (Parkir: Rp 5.000)',
+        image: 'karang-hawu.webp',
+        facilities: ['Area Parkir', 'Warung Makan', 'Toilet', 'Gazebo', 'Spot Foto Sunset'],
+        tips: 'Waktu terbaik berkunjung adalah sore hari untuk menikmati sunset. Hati-hati saat berjalan di bebatuan yang licin.',
+        color: '#8b5cf6'
+      }
+    };
+
+    // Show destination popup
+    function showDestination(id) {
+      const dest = destinations[id];
+      if (!dest) return;
+      
+      const popup = document.getElementById('destPopup');
+      const content = document.getElementById('destContent');
+      
+      content.innerHTML = `
+        <div class="relative">
+          <button onclick="closeDestination()" class="absolute top-0 right-0 w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition">
+            ✕
+          </button>
+          <div class="w-full h-40 rounded-2xl mb-4 relative overflow-hidden">
+            <img src="${dest.image}" alt="${dest.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="w-full h-full items-center justify-center text-6xl hidden" style="background: linear-gradient(135deg, ${dest.color}aa, ${dest.color});">
+              ${id === 'ciletuh' ? '🌋' : id === 'pelabuhan-ratu' ? '🏖️' : id === 'gede-pangrango' ? '🏔️' : id === 'situ-gunung' ? '🌲' : id === 'curug-sawer' ? '💧' : '🪨'}
+            </div>
+          </div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-medium mb-2" style="background: ${dest.color}20; color: ${dest.color};">${dest.category}</span>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">${dest.name}</h3>
+          <p class="text-gray-600 text-sm mb-4">${dest.description}</p>
+          
+          <div class="bg-gray-50 rounded-xl p-4 mb-4 space-y-2">
+            <div class="flex items-center gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+              <span class="font-medium">Koordinat:</span>
+              <div class="flex items-center gap-2 text-sm text-gray-700">
+  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+  </svg>
+
+  <span class="font-medium">Koordinat:</span>
+
+  <a
+    href="https://www.google.com/maps?q=${dest.coordinates.lat},${dest.coordinates.lng}"
+    target="_blank"
+    class="text-blue-600 hover:underline"
+  >
+    ${dest.coordinates.lat}, ${dest.coordinates.lng}
+  </a>
+</div>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="text-2xl">💰</span>
+              <div>
+                <span class="font-bold text-lg" style="color: ${dest.color};">${dest.price}</span>
+                <p class="text-gray-600 text-xs">${dest.priceDetail}</p>
+              </div>
+            </div>
+          </div>
+          
+          <h4 class="font-semibold text-gray-800 mb-2">Fasilitas</h4>
+          <div class="flex flex-wrap gap-2 mb-4">
+            ${dest.facilities.map(f => `<span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">${f}</span>`).join('')}
+          </div>
+          
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+            <h4 class="font-semibold text-amber-800 mb-1 flex items-center gap-2">💡 Tips Berkunjung</h4>
+            <p class="text-amber-700 text-sm">${dest.tips}</p>
+          </div>
+          
+          <button onclick="closeDestination()" class="w-full py-3 rounded-xl font-medium text-white transition" style="background: ${dest.color};">
+            Tutup
+          </button>
+        </div>
+      `;
+      
+      popup.classList.remove('hidden');
+    }
+
+    // Close destination popup
+    function closeDestination() {
+      document.getElementById('destPopup').classList.add('hidden');
+    }
+
+    // Close popup when clicking outside
+    document.getElementById('destPopup').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDestination();
+      }
+    });
+
+    // Filter category (placeholder function)
+    function filterCategory(category) {
+      const categoryNames = {
+        'alam': 'Wisata Alam',
+        'budaya': 'Wisata Budaya',
+        'edukasi': 'Wisata Edukasi',
+        'kuliner': 'Wisata Kuliner'
+      };
+      
+      // Show inline notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-bounce';
+      notification.textContent = `Menampilkan ${categoryNames[category]}`;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 2000);
+    }
+
+    // Mobile menu toggle
+    document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('#mobileMenu a').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('mobileMenu').classList.add('hidden');
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Config change handler
+    async function onConfigChange(config) {
+      const heroTitle = document.getElementById('heroTitle');
+      const heroSubtitle = document.getElementById('heroSubtitle');
+      const aboutTitle = document.getElementById('aboutTitle');
+      const contactPhone = document.getElementById('contactPhone');
+      const contactEmail = document.getElementById('contactEmail');
+      
+      if (heroTitle) {
+        heroTitle.innerHTML = (config.hero_title || defaultConfig.hero_title).replace('\n', '<br/>');
+      }
+      if (heroSubtitle) {
+        heroSubtitle.textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+      }
+      if (aboutTitle) {
+        aboutTitle.textContent = config.about_title || defaultConfig.about_title;
+      }
+      if (contactPhone) {
+        contactPhone.textContent = config.contact_phone || defaultConfig.contact_phone;
+      }
+      if (contactEmail) {
+        contactEmail.textContent = config.contact_email || defaultConfig.contact_email;
+      }
+    }
+
+    // Initialize Element SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['hero_title', config.hero_title || defaultConfig.hero_title],
+          ['hero_subtitle', config.hero_subtitle || defaultConfig.hero_subtitle],
+          ['about_title', config.about_title || defaultConfig.about_title],
+          ['contact_phone', config.contact_phone || defaultConfig.contact_phone],
+          ['contact_email', config.contact_email || defaultConfig.contact_email]
+        ])
+      });
+    }
+  </script>
+  <script>
+const kategoriData = {
+  alam: {
+    title: "Wisata Alam",
+    items: [
+      {
+        nama: "Geopark Ciletuh",
+        gambar: "ciletuh.jpg",
+        harga: "Rp 10.000",
+        lokasi: "Ciwaru, Kec. Ciemas, Kabupaten Sukabumi, Jawa Barat 43177",
+        deskripsi: "Kawasan geopark nasional dengan tebing, air terjun, dan pantai.",
+        detail: "Akses motor, Area parkir, Toilet, Guide lokal. Jam buka: 07.00–17.00."
+      },
+      {
+        nama: "Curug Cikaso",
+        gambar: "cikaso.webp",
+        harga: "Rp 5.000",
+        lokasi: "Desa Ciniti, Cibitung, Sukabumi Regency, West Java 43172",
+        deskripsi: "Air terjun bertingkat dengan aliran sungai hijau kebiruan.",
+        detail: "Akses motor, Warung, Toilet. Disarankan datang pagi hari."
+      },
+      {
+        nama: "Curug Sawer",
+        gambar: "curug sawer.webp",
+        harga: "Rp 15.000",
+        lokasi: "Gede Pangrango, Kec. Kadudampit, Kabupaten Sukabumi, Jawa Barat 43153",
+        deskripsi: "Air terjun bertingkat kaki gunung gede pangrango dengan aliran sungai hijau kebiruan.",
+        detail: "Toilet, Ojek, Warung, Angkutan umum, Akses mobil, Wisata perahu karet, Guide lokal, Disarankan datang pagi hari."
+      }
+    ]
+  },
+
+  budaya: {
+    title: "Wisata Budaya",
+    items: [
+      {
+        nama: "Kampung Adat Ciptagelar",
+        gambar: "gelar alam.webp",
+        harga: "Gratis",
+        lokasi: "Sirnaresmi, Kabupaten Sukabumi, Jawa Barat",
+        deskripsi: "Perkampungan adat Sunda dengan tradisi leluhur.",
+        detail: "Kegiatan: Seren Taun, rumah adat, budaya lokal."
+      },
+      {
+        nama: "Kampung Adat Ciptamulya",
+        gambar: "ciptamulya.jpeg",
+        harga: "Gratis",
+        lokasi: "Sirnaresmi, Kec. Cisolok, Kabupaten Sukabumi, Jawa Barat 43366",
+        deskripsi: "Perkampungan adat Sunda dengan tradisi leluhur.",
+        detail: "Kegiatan: Seren Taun, rumah adat, budaya lokal."
+      }
+    ]
+  },
+
+  edukasi: {
+    title: "Wisata Edukasi",
+    items: [
+      {
+        nama: "Museum Prabu Siliwangi",
+        gambar: "museum prabu.jpg",
+        harga: "Rp 5.000",
+        lokasi: "Ponpes Dzikir Al Fath, Jl. Merbabu Perum Gading Kencana Asri, Komplek, Kelurahan Karangtengah, Kec. Gunungpuyuh, Kota Sukabumi, Jawa Barat 43121",
+        deskripsi: "Museum sejarah dan budaya Sunda.",
+        detail: "Cocok untuk pelajar dan penelitian sejarah."
+      }
+    ]
+  },
+
+  kuliner: {
+    title: "Wisata Kuliner",
+    items: [
+      {
+        nama: "Mochi Sukabumi",
+        gambar: "moci.jpg",
+        harga: "Rp 25.000 / box",
+        lokasi: "Gg. Kaswari No.1, Selabatu, Kec. Cikole, Kota Sukabumi, Jawa Barat 43114",
+        deskripsi: "Oleh-oleh khas Sukabumi berbahan tepung ketan.",
+        detail: "Varian kacang, coklat, keju, Dan lain-lain."
+      }
+    ]
+  }
+};
+
+function filterCategory(kategori) {
+  const data = kategoriData[kategori];
+  document.getElementById("modalTitle").innerText = data.title;
+
+  let html = "";
+  data.items.forEach(item => {
+    html += `
+      <div class="bg-gray-50 rounded-xl overflow-hidden shadow hover:shadow-lg transition">
+        <img src="${item.gambar}" class="w-full h-48 object-cover">
+        <div class="p-4 space-y-2">
+          <h4 class="text-lg font-bold text-gray-800">${item.nama}</h4>
+          <p class="text-sm text-gray-600">${item.deskripsi}</p>
+          <div class="text-sm text-gray-700">
+            <p>
+  <strong>📍 Lokasi:</strong>
+  <a 
+    href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.nama + ', ' + item.lokasi)}"
+    target="_blank"
+    class="text-blue-600 hover:underline"
+  >
+    ${item.lokasi}
+  </a>
+</p>
+
+            <p><strong> Harga tiket:</strong> ${item.harga}</p>
+          </div>
+          <p class="text-xs text-gray-500">${item.detail}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("modalContent").innerHTML = html;
+  document.getElementById("kategoriModal").classList.remove("hidden");
+  document.getElementById("kategoriModal").classList.add("flex");
+}
+
+function closeModal() {
+  document.getElementById("kategoriModal").classList.add("hidden");
+  document.getElementById("kategoriModal").classList.remove("flex");
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const map = L.map('map').setView([-6.9,106.9],10);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  // FUNCTION AMBIL ALAMAT
+  function getAddress(lat, lng, callback){
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .then(res => res.json())
+      .then(data => {
+        callback(data.display_name || "Alamat tidak ditemukan");
+      })
+      .catch(() => {
+        callback("Gagal mengambil alamat");
+      });
+  }
+
+  // FUNCTION TAMBAH MARKER
+  function addTourMarker(lat, lng, title, imageUrl){
+    const marker = L.marker([lat,lng]).addTo(map);
+
+    marker.on("click", function(){
+      getAddress(lat, lng, function(address){
+        marker.bindPopup(`
+          <div style="width:220px">
+            <img src="${imageUrl}" style="width:100%;border-radius:10px;margin-bottom:8px;">
+            <h3 style="font-weight:bold;margin:4px 0;">${title}</h3>
+            <p style="font-size:12px;color:#555;">${address}</p>
+          </div>
+        `).openPopup();
+      });
+    });
+  }
+
+  // DATA WISATA
+  addTourMarker(
+    -6.987, 106.550,
+    "Pantai Pelabuhan Ratu",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+  );
+
+  addTourMarker(
+    -6.890, 106.920,
+    "Situ Gunung",
+    "https://images.unsplash.com/photo-1501785888041-af3ef285b470"
+  );
+
+  addTourMarker(
+    -7.210, 106.470,
+    "Geopark Ciletuh",
+    "https://images.unsplash.com/photo-1526772662000-3f88f10405ff"
+  );
+
+  addTourMarker(
+    -6.831, 106.930,
+    "Curug Sawer",
+    "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepNl6SaVE5mi58TE4263SlgQ6M2gvM4fYF6DyAkSzOVYImDnT7HwU4wUSll9zpj-WT8efof2lFHKm4zlTM9n9C_sVyghZA4V08KBArB63I59MbafjatCDH6b3pSvsJ9_K7UWU5X=w408-h306-k-no"
+  );
+
+   addTourMarker(
+    -6.906, 106.910,
+    "Museum Prabu Siliwangi",
+    "data:image/jpeg;base64,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"
+  );
+
+});
+</script>
+
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c4ed59fa7e9f932',t:'MTc2OTU4NTk1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</body>
+</html>
